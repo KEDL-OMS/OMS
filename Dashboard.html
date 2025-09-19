@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Outage Management System KEDL-CESC Rajasthan</title>
+<style>
+/* --- your existing CSS remains unchanged --- */
+html, body {
+  margin:0; padding:0; height:100%; width:100%;
+  font-family: Arial, sans-serif; overflow:hidden;
+}
+.sidebar { position:absolute; top:0; left:0; width:160px; height:100%; background:#004080; color:white; display:flex; flex-direction:column; padding:20px 10px; transition: transform 0.3s ease; z-index:1000; overflow-y:auto; box-shadow: 2px 0 8px rgba(0,0,0,0.3); }
+.sidebar.collapsed { transform: translateX(-180px); }
+.sidebar a { color:white; text-decoration:none; padding:10px; border-radius:6px; margin-bottom:10px; display:block; font-size:16px; font-weight:bold; transition: background 0.2s; }
+.sidebar a:hover { background:#0066cc; }
+.sidebar a.active { background:#00264d; }
+header { position:absolute; top:0; left:0; width:100%; height:100px; background:#004080; display:flex; align-items:center; padding:0 20px; box-sizing:border-box; z-index:500; }
+header .logo-left, header .logo-right { height:80px; width:120px; object-fit:contain; }
+header .logo-left { position:absolute; left:20px; }
+header .logo-right { position:absolute; right:220px; }
+header .title { position:absolute; left:50%; transform:translateX(-50%); font-weight:bold; font-size:24px; color:white; white-space:nowrap; }
+.refresh-btn, .logout-btn { border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
+.refresh-btn { position:absolute; right:150px; background:#009933; color:white; }
+.refresh-btn:hover { background:#00cc44; }
+.logout-btn { position:absolute; right:80px; background:#cc0000; color:white; }
+.logout-btn:hover { background:#ff3333; }
+.menu-toggle { position:absolute; right:20px; font-size:32px; cursor:pointer; user-select:none; }
+.ribbon { position:absolute; top:100px; left:160px; right:0; min-height:50px; background-color:#0066cc; display:flex; flex-wrap:wrap; align-items:center; padding:5px 10px; white-space:normal; z-index:400; border:4px solid black; border-radius:0; box-sizing:border-box; transition: left 0.3s ease; }
+.ribbon a { color:white; text-decoration:none; padding:8px 14px; margin:4px 6px; border-radius:6px; font-weight:bold; flex-shrink:0; transition: background 0.2s; }
+.ribbon a:hover { background-color:#004080; }
+.ribbon a.active { background-color:#00264d; }
+.bottom-ribbon { position:absolute; bottom:0; left:0; width:100%; height:25px; background-color:#00264d; color:white; font-weight:bold; display:flex; align-items:center; justify-content:center; z-index:600; pointer-events:none; }
+.iframe-wrapper { position:absolute; top:0; left:160px; width:calc(100% - 160px); height:calc(100% - 100px); overflow:auto; z-index:100; padding:10px; box-sizing:border-box; transition: left 0.3s ease, width 0.3s ease, top 0.3s ease, height 0.3s ease; }
+table { border-collapse: collapse; width:100%; table-layout: fixed; }
+th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; white-space:normal; }
+.spinner { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); border:8px solid #f3f3f3; border-top:8px solid #004080; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; z-index:999; }
+@keyframes spin { 0% { transform:translate(-50%,-50%) rotate(0deg); } 100% { transform:translate(-50%,-50%) rotate(360deg); } }
+@media (max-width:768px){ .sidebar { width:140px; left:-160px; position:fixed; top:0; } .sidebar.show { transform:translateX(0); } .ribbon { top:140px; left:0; right:0; } .iframe-wrapper { top:0; left:0; width:100%; } header .logo-left, header .logo-right { height:50px; width:80px; } header .title { font-size:16px; left:100px; right:100px; transform:none; white-space:normal; } }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <a href="#" data-sheet="01" class="active">OMS Dashboard</a>
+  <a href="#" data-sheet="02">11 kV Network Change</a>
+  <a href="#" data-sheet="03">33 kV Network Change</a>
+  <a href="#" data-sheet="04">Non-Sheddable Feeders</a>
+  <a href="#" data-sheet="05">Today's Planned Shutdown</a>
+  <a href="#" data-sheet="06">Upcoming Planned Shutdown</a>
+  <a href="#" data-sheet="07">Try Pending</a>
+  <a href="#" data-sheet="08">Not Hold</a>
+  <a href="#" data-sheet="09">Part Restored</a>
+  <a href="#" data-sheet="010">Current Day Report</a>
+  <a href="#" data-sheet="011">Last Day Report</a>
+  <a href="#" data-sheet="012">MTD Report</a>
+</div>
+
+<!-- Header -->
+<header>
+  <img src="Images/KEDL-Logo.png" class="logo-left">
+  <div class="title">Outage Management System KEDL-CESC Rajasthan</div>
+  <img src="Images/RPSG-Logo.png" class="logo-right">
+  <button class="refresh-btn" id="refreshSheet">Refresh</button>
+  <button class="logout-btn" id="logoutBtn">Logout</button>
+  <span class="menu-toggle" id="menuToggle">&#9776;</span>
+</header>
+
+<!-- Ribbon -->
+<div class="ribbon">
+  <a href="dashboard.html" target="_blank">OMS</a>
+  <a href="UD.html" target="_blank">CMS</a>
+  <a href="UD.html" target="_blank">PTR Loading</a>
+  <a href="UD.html" target="_blank">KEDL</a>
+  <a href="UD.html" target="_blank">HT Feeders</a>
+  <a href="UD.html" target="_blank">Reliability Indices</a>
+  <a href="UD.html" target="_blank">SCADA</a>
+  <a href="UD.html" target="_blank">Sub-Station</a>
+  <a href="UD.html" target="_blank">DT</a>
+</div>
+
+<!-- Table -->
+<div class="iframe-wrapper"></div>
+<div class="spinner" id="spinner"></div>
+
+<!-- Bottom Ribbon -->
+<div class="bottom-ribbon">Designed & Developed by SCADA Control Room-KEDL</div>
+
+<script>
+if(localStorage.getItem("loggedIn")!=="true"){ window.location.href="index.html"; }
+
+const webAppUrl="https://script.google.com/macros/s/AKfycbx3OxM9mh3KBRX9OfvyAdhJJNcxefcoESn-a_afHGhx9mnmp9MsBnjGaiGF3lA2EZvK/exec";
+const wrapper=document.querySelector(".iframe-wrapper");
+const spinner=document.getElementById("spinner");
+const sidebar=document.getElementById("sidebar");
+const sidebarLinks=document.querySelectorAll(".sidebar a[data-sheet]");
+const refreshBtn=document.getElementById("refreshSheet");
+const menuToggle=document.getElementById("menuToggle");
+const ribbon=document.querySelector(".ribbon");
+let currentSheet="01";
+
+function normalizeCell(raw){ if(raw === null || raw === undefined) return {}; if(typeof raw === "string" || typeof raw === "number") return { value: String(raw), hyperlink: raw.hyperlink || null }; return raw; }
+function pick(obj, keys){ for(const k of keys){ if(obj && obj[k]!==undefined && obj[k]!==null) return obj[k]; } return undefined; }
+function getText(raw){ const direct=pick(raw,["value","formattedValue","text","label","displayValue"]); if(direct!==undefined) return String(direct); if(raw && raw.userEnteredValue && raw.userEnteredValue.stringValue) return String(raw.userEnteredValue.stringValue); if(raw && raw.effectiveValue && raw.effectiveValue.stringValue) return String(raw.effectiveValue.stringValue); return ""; }
+
+function adjustWrapperPosition(){ const topOffset=100+ribbon.offsetHeight; wrapper.style.top=topOffset+"px"; wrapper.style.height=`calc(100% - ${topOffset}px)`; if(sidebar.classList.contains("collapsed")){ wrapper.style.left="0px"; wrapper.style.width="100%"; }else{ wrapper.style.left=sidebar.offsetWidth+"px"; wrapper.style.width=`calc(100% - ${sidebar.offsetWidth}px)`; } }
+
+async function loadSheet(sheetName, showSpinner=true){
+  if(showSpinner) spinner.style.display="block";
+  try{
+    const res=await fetch(`${webAppUrl}?sheet=${encodeURIComponent(sheetName)}&ts=${Date.now()}`);
+    const json=await res.json();
+    if(!json.data) json.data=[]; if(!json.colWidths) json.colWidths=[]; if(!json.rowHeights) json.rowHeights=[]; if(!json.merged) json.merged=[];
+    renderSheet(json);
+  }catch(err){ wrapper.innerHTML=`<div style="color:red;">Error: ${err.message}</div>`; } 
+  finally{ if(showSpinner) spinner.style.display="none"; }
+}
+
+function renderSheet(json){
+  wrapper.innerHTML="";
+  let scrollWrapper = wrapper;
+
+  // sheets that should use the scroll-wrapper logic (same as sheet "02")
+  const scrollSheets = ["02","05","06","010","011","012"];
+
+  if(scrollSheets.includes(currentSheet)){
+    scrollWrapper = document.createElement("div");
+    scrollWrapper.style.overflowX = "auto";
+    scrollWrapper.style.overflowY = "auto";
+    scrollWrapper.style.width = "100%";
+    scrollWrapper.style.height = "calc(100% - 25px)";
+    scrollWrapper.style.marginBottom = "25px";
+    wrapper.appendChild(scrollWrapper);
+  }
+
+  const table=document.createElement("table");
+  let autoFit = (currentSheet==="01");
+
+  if(!autoFit){
+    const colWidths=json.colWidths||[];
+    const colgroup=document.createElement("colgroup");
+    const maxCols=Math.max(colWidths.length, (json.data && json.data[0]?.length)||0);
+    for(let i=0;i<maxCols;i++){
+      const col=document.createElement("col");
+      if(currentSheet==="02"){
+        let w = colWidths[i] || 120;
+        if(w < 100) w = 100;
+        if(i===11){ w = 250; } // column 12 special width
+        col.style.width = w + "px";
+      }else{
+        col.style.width=(colWidths[i]?colWidths[i]+"px":"120px");
+      }
+      colgroup.appendChild(col);
+    }
+    table.appendChild(colgroup);
+    table.style.tableLayout="fixed";
+  }else{
+    table.style.tableLayout="auto";
+    table.style.width="100%";
+  }
+
+  const rows=json.data||[];
+  rows.forEach((rowData,i)=>{
+    const tr=document.createElement("tr");
+    (rowData||[]).forEach((cellRaw,j)=>{
+      const raw=normalizeCell(cellRaw);
+      const cell=document.createElement(i===0?"th":"td");
+
+      // --- Updated: Special clickable hyperlink cell (Sheet "02" remains unchanged) ---
+      const targetRow = 0;   // row 1 (0-based)
+      const targetCol = 12;  // column 13 (0-based)
+      const googleSheetUrl = "https://docs.google.com/spreadsheets/d/1eTSiXUk-FaLpfq85-NIDbXoY1qMtkmaXG6bj_epD0tw/edit?pli=1#gid=0"; // replace if needed
+
+      if(currentSheet==="02" && i===targetRow && j===targetCol){
+        const a = document.createElement("a");
+        a.href = googleSheetUrl;
+        a.textContent = getText(raw);
+        a.target = "_blank";
+        a.style.color = "white";
+        a.style.fontWeight = "bold";
+        a.style.textDecoration = "underline";
+        a.addEventListener("mouseenter", ()=>{ a.style.color="yellow"; });
+        a.addEventListener("mouseleave", ()=>{ a.style.color="white"; });
+        cell.appendChild(a);
+      } 
+      else if(raw.hyperlink){
+        const a = document.createElement("a");
+        a.href = raw.hyperlink;
+        a.textContent = getText(raw);
+        a.target = "_blank";
+        cell.appendChild(a);
+      } 
+      else {
+        cell.textContent = getText(raw);
+      }
+
+      const tf=raw.textFormat||{};
+      const bg=pick(raw,["background","backgroundColor","bg","bgColor"]);
+      const color=pick(raw,["color","textColor","fontColor"])||tf.foregroundColor;
+      const weight=pick(raw,["weight","fontWeight","bold"]);
+      const align=pick(raw,["align","hAlign","horizontalAlignment"]);
+      const valign=pick(raw,["valign","verticalAlign"]);
+      const fsize=pick(raw,["fontSize","size"])??tf.fontSize;
+      const ffam=pick(raw,["fontFamily","font"])??tf.fontFamily;
+      const italic=pick(raw,["italic"])??tf.italic;
+      const underline=pick(raw,["underline"])||tf.underline;
+      const strike=pick(raw,["strike","strikethrough"])||tf.strikethrough;
+      const wrap=pick(raw,["wrap","wrapStrategy","wrapText"]);
+
+      cell.style.backgroundColor=bg||(i===0?"#004080":"white");
+      cell.style.color=color||(i===0?"white":"black");
+      if(weight!==undefined){ if(typeof weight==="boolean") cell.style.fontWeight=weight?"bold":"normal"; else if(typeof weight==="number") cell.style.fontWeight=(weight>=600?"bold":"normal"); else cell.style.fontWeight=String(weight); } else if(i===0) cell.style.fontWeight="bold";
+      cell.style.textAlign=align||(i===0?"center":"left");
+      if(valign) cell.style.verticalAlign=valign;
+      cell.style.fontSize=fsize?parseInt(fsize,10)+"px":"14px";
+      cell.style.fontFamily=ffam||"Arial, sans-serif";
+      if(italic) cell.style.fontStyle="italic";
+      if(underline && strike) cell.style.textDecoration="underline line-through";
+      else if(underline) cell.style.textDecoration="underline";
+      else if(strike) cell.style.textDecoration="line-through";
+
+      if(wrap!==undefined){
+        const w=String(wrap).toUpperCase();
+        if(w==="WRAP"||wrap===true){ cell.style.whiteSpace="normal"; cell.style.wordBreak="break-word"; } 
+        else if(w==="CLIP"){ cell.style.whiteSpace="nowrap"; cell.style.overflow="hidden"; cell.style.textOverflow="clip"; } 
+        else if(w==="OVERFLOW"){ cell.style.whiteSpace="nowrap"; cell.style.overflow="visible"; }
+      }else{ cell.style.whiteSpace="normal"; cell.style.wordBreak="break-word"; }
+
+      tr.appendChild(cell);
+    });
+    table.appendChild(tr);
+  });
+
+  (json.merged||[]).forEach(m=>{
+    if(!m.numRows||!m.numCols) return;
+    try{
+      const r=Math.max(0,m.startRow-1);
+      const c=Math.max(0,m.startCol-1);
+      while(!table.rows[r]){ const emptyRow=table.insertRow(r); const colsCount=table.rows[0]?table.rows[0].cells.length:(m.numCols||1); for(let k=0;k<colsCount;k++) emptyRow.insertCell(); }
+      const baseRow=table.rows[r];
+      while(!baseRow.cells[c]) baseRow.insertCell(c);
+      const baseCell=baseRow.cells[c];
+      baseCell.rowSpan=m.numRows;
+      baseCell.colSpan=m.numCols;
+      for(let rr=0;rr<m.numRows;rr++){
+        for(let cc=0;cc<m.numCols;cc++){
+          if(rr===0 && cc===0) continue;
+          const hideRow=table.rows[r+rr];
+          if(hideRow){ while(!hideRow.cells[c+cc]) hideRow.insertCell(c+cc); hideRow.cells[c+cc].style.display="none"; }
+        }
+      }
+    }catch(e){ console.warn("merge error",e); }
+  });
+
+  (json.rowHeights||[]).forEach((h,i)=>{ if(table.rows[i]) table.rows[i].style.height=(h||25)+"px"; });
+
+  scrollWrapper.appendChild(table);
+  adjustWrapperPosition();
+}
+
+// Initial load
+loadSheet(currentSheet,true);
+
+// Sidebar click
+sidebarLinks.forEach(link=>{
+  link.addEventListener("click", e=>{
+    e.preventDefault();
+    sidebarLinks.forEach(l=>l.classList.remove("active"));
+    link.classList.add("active");
+    currentSheet=link.getAttribute("data-sheet");
+    loadSheet(currentSheet,true);
+    if(window.innerWidth<=768){ sidebar.classList.remove("show"); }else{ sidebar.classList.add("collapsed"); ribbon.style.left="0px"; adjustWrapperPosition(); }
+  });
+});
+
+// Refresh & Auto refresh
+refreshBtn.addEventListener("click", ()=>loadSheet(currentSheet,true));
+setInterval(()=>loadSheet(currentSheet,false),10000);
+
+// Toggle Menu
+menuToggle.addEventListener("click", ()=>{
+  sidebar.classList.toggle("collapsed");
+  if(window.innerWidth<=768) sidebar.classList.toggle("show");
+  ribbon.style.left=sidebar.classList.contains("collapsed")?"0px":sidebar.offsetWidth+"px";
+  adjustWrapperPosition();
+});
+
+// Collapse sidebar when clicking outside
+document.addEventListener("click", event=>{
+  const isInside=sidebar.contains(event.target);
+  const isToggle=menuToggle.contains(event.target);
+  if((sidebar.classList.contains("show")||!sidebar.classList.contains("collapsed"))&&!isInside&&!isToggle){
+    if(window.innerWidth<=768){ sidebar.classList.remove("show"); }else{ sidebar.classList.add("collapsed"); ribbon.style.left="0px"; adjustWrapperPosition(); }
+  }
+});
+
+window.addEventListener("resize", adjustWrapperPosition);
+</script>
+</body>
+</html>

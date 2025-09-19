@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - OMS KEDL</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #004080;
+      font-family: Arial, sans-serif;
+    }
+
+    /* White inner box */
+    .login-box {
+      width: 90%;
+      max-width: 400px;
+      min-width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Centers children vertically */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .login-box h2 {
+      margin-bottom: 30px;
+      color: #004080;
+      text-align: center;
+    }
+
+    .login-box input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .login-box button {
+      width: 85%;
+      padding: 10px;
+      margin-top: 20px;
+      background-color: #004080;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .login-box button:hover {
+      background-color: #00264d;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .login-box {
+        padding: 15px;
+      }
+      .login-box h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      .login-box input, .login-box button {
+        width: 90%;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>OMS-SCADA Control Room</h2>
+    <input type="text" placeholder="Username" id="username">
+    <input type="password" placeholder="Password" id="password">
+    <button id="loginBtn">Login</button>
+  </div>
+
+  <script>
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn.addEventListener("click", () => {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // Simple check (replace with real authentication)
+      if(username === "admin" && password === "admin") {
+        localStorage.setItem("loggedIn", "true");
+        window.location.href = "dashboard.html"; // Redirect to dashboard
+      } else {
+        alert("Invalid username or password!");
+      }
+    });
+  </script>
+</body>
+</html>
