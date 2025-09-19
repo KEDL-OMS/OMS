@@ -275,7 +275,7 @@ sidebarLinks.forEach(link=>{
 
 // Refresh & Auto refresh
 refreshBtn.addEventListener("click", ()=>loadSheet(currentSheet,true));
-setInterval(()=>loadSheet(currentSheet,false),10000);
+setInterval(()=>loadSheet(currentSheet,false),30000);
 
 // Toggle Menu
 menuToggle.addEventListener("click", ()=>{
@@ -306,5 +306,6 @@ window.addEventListener("resize", adjustWrapperPosition);
 </script>
 </body>
 </html>
+
 
 
