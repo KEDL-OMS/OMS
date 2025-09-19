@@ -294,8 +294,17 @@ document.addEventListener("click", event=>{
   }
 });
 
+  // Logout logic
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("loggedIn");   // Clear login flag
+  window.location.href = "index.html";   // Redirect to login page
+});
+
+
 window.addEventListener("resize", adjustWrapperPosition);
 </script>
 </body>
 </html>
+
 
