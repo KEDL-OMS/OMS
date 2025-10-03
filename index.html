@@ -15,7 +15,6 @@
       font-family: Arial, sans-serif;
     }
 
-    /* White inner box */
     .login-box {
       width: 90%;
       max-width: 400px;
@@ -65,19 +64,10 @@
       background-color: #00264d;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 480px) {
-      .login-box {
-        padding: 15px;
-      }
-      .login-box h2 {
-        font-size: 20px;
-        margin-bottom: 20px;
-      }
-      .login-box input, .login-box button {
-        width: 90%;
-        font-size: 14px;
-      }
+      .login-box { padding: 15px; }
+      .login-box h2 { font-size: 20px; margin-bottom: 20px; }
+      .login-box input, .login-box button { width: 90%; font-size: 14px; }
     }
   </style>
 </head>
@@ -95,7 +85,7 @@
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
 
-      if(username === "admin" && password === "admin") {
+      if(username === "admin" && password === "admin#123") {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("role", "admin");
         window.location.href = "dashboard.html";
@@ -103,6 +93,11 @@
       else if(username === "kedl" && password === "kedl@123") {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("role", "omsUser");
+        window.location.href = "dashboard.html";
+      }
+      else if(username === "kedl_htm" && password === "kedlhtm@123") {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("role", "kedlHTM");
         window.location.href = "dashboard.html";
       }
       else {
