@@ -30,19 +30,13 @@ header .title { position:absolute; left:50%; transform:translateX(-50%); font-we
 .iframe-wrapper { position:absolute; top:0; left:160px; width:calc(100% - 160px); height:calc(100% - 100px); overflow:auto; z-index:100; padding:10px; box-sizing:border-box; transition:left 0.3s ease, width 0.3s ease, top 0.3s ease, height 0.3s ease; }
 table { border-collapse: collapse; width:100%; table-layout: fixed; }
 th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; white-space:normal; }
-
-/* -------- Blue Hover Effect for non-OMS sheets -------- */
-.iframe-wrapper table.oms-hover tr:hover td {
-  background-color: #cce0ff !important;
-}
-
+.iframe-wrapper table.oms-hover tr:hover td { background-color: #cce0ff !important; }
 .spinner { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); border:8px solid #f3f3f3; border-top:8px solid #004080; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; z-index:999; }
 @keyframes spin { 0% { transform:translate(-50%,-50%) rotate(0deg); } 100% { transform:translate(-50%,-50%) rotate(360deg); } }
 @media (max-width:768px){ .sidebar { width:140px; left:-160px; position:fixed; top:0; } .sidebar.show { transform:translateX(0); } .ribbon { top:140px; left:0; right:0; } .iframe-wrapper { top:0; left:0; width:100%; } header .logo-left, header .logo-right { height:50px; width:80px; } header .title { font-size:16px; left:100px; right:100px; transform:none; white-space:normal; } }
 </style>
 </head>
 <body>
-
 <div class="sidebar collapsed" id="sidebar">
   <a href="#" data-sheet="01" class="active">OMS Dashboard</a>
   <a href="#" data-sheet="02">11 kV Network Change</a>
@@ -57,7 +51,6 @@ th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; whit
   <a href="#" data-sheet="011">Last Day Report</a>
   <a href="#" data-sheet="012">MTD Report</a>
 </div>
-
 <header>
   <img src="Images/KEDL-Logo.png" class="logo-left">
   <div class="title">Outage Management System KEDL-CESC Rajasthan</div>
@@ -66,7 +59,6 @@ th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; whit
   <button class="logout-btn" id="logoutBtn">Logout</button>
   <span class="menu-toggle" id="menuToggle">&#9776;</span>
 </header>
-
 <div class="ribbon">
   <a href="dashboard.html">OMS</a>
   <a href="dashboard-CMS.html">CMS</a>
@@ -78,25 +70,16 @@ th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; whit
   <a href="UD.html">Sub-Station</a>
   <a href="UD.html">DT</a>
 </div>
-
 <div class="iframe-wrapper"></div>
 <div class="spinner" id="spinner"></div>
 <div class="bottom-ribbon">Designed & Developed by SCADA Control Room-KEDL</div>
-
 <script>
 // ---------- Login check ----------
 if(localStorage.getItem("loggedIn")!=="true"){ window.location.href="index.html"; }
-
-// ---------- Role-based ribbon access ----------
 const role = localStorage.getItem("role");
 const ribbon = document.querySelector(".ribbon");
-if(role === "omsUser"){ // only OMS clickable
-  ribbon.querySelectorAll("a").forEach(link=>{ if(link.textContent.trim()!=="OMS"){ link.classList.add("disabled"); } });
-}else if(role === "kedlHTM"){ // OMS + CMS clickable
-  ribbon.querySelectorAll("a").forEach(link=>{ if(link.textContent.trim()!=="OMS" && link.textContent.trim()!=="CMS"){ link.classList.add("disabled"); } });
-}
-
-// ---------- Sidebar, ribbon, wrapper ----------
+if(role === "omsUser"){ ribbon.querySelectorAll("a").forEach(link=>{ if(link.textContent.trim()!=="OMS"){ link.classList.add("disabled"); } }); }
+else if(role === "kedlHTM"){ ribbon.querySelectorAll("a").forEach(link=>{ if(link.textContent.trim()!=="OMS" && link.textContent.trim()!=="CMS"){ link.classList.add("disabled"); } }); }
 const webAppUrl="https://script.google.com/macros/s/AKfycbx3OxM9mh3KBRX9OfvyAdhJJNcxefcoESn-a_afHGhx9mnmp9MsBnjGaiGF3lA2EZvK/exec";
 const wrapper=document.querySelector(".iframe-wrapper");
 const spinner=document.getElementById("spinner");
@@ -105,7 +88,6 @@ const sidebarLinks=document.querySelectorAll(".sidebar a[data-sheet]");
 const refreshBtn=document.getElementById("refreshSheet");
 const menuToggle=document.getElementById("menuToggle");
 let currentSheet="01";
-
 function adjustWrapperPosition(){ 
   const topOffset=100+ribbon.offsetHeight;
   wrapper.style.top=topOffset+"px";
@@ -117,8 +99,6 @@ function adjustRibbonPosition(){
   ribbon.style.left = sidebar.classList.contains("collapsed") ? "0px" : sidebar.offsetWidth+"px";
   ribbon.style.right = "0px";
 }
-
-// Sidebar toggle & outside click
 menuToggle.addEventListener("click", ()=>{
   sidebar.classList.toggle("collapsed");
   if(window.innerWidth<=768) sidebar.classList.toggle("show");
@@ -135,15 +115,11 @@ document.addEventListener("click", event=>{
     adjustWrapperPosition();
   }
 });
-
-// Logout
 document.getElementById("logoutBtn").addEventListener("click", ()=>{
   localStorage.removeItem("loggedIn");
   localStorage.removeItem("role");
   window.location.href="index.html";
 });
-
-// Sidebar sheet click
 sidebarLinks.forEach(link=>{
   link.addEventListener("click", e=>{
     e.preventDefault();
@@ -155,21 +131,12 @@ sidebarLinks.forEach(link=>{
     else{ sidebar.classList.add("collapsed"); adjustRibbonPosition(); adjustWrapperPosition(); }
   });
 });
-
-// Refresh & auto-refresh
 refreshBtn.addEventListener("click", ()=>loadSheet(currentSheet,true));
 setInterval(()=>loadSheet(currentSheet,false),30000);
-window.addEventListener("resize", ()=>{
-  adjustWrapperPosition();
-  adjustRibbonPosition();
-});
-
-// ---------- Helper functions ----------
+window.addEventListener("resize", ()=>{ adjustWrapperPosition(); adjustRibbonPosition(); });
 function normalizeCell(raw){ if(raw===null||raw===undefined) return {}; if(typeof raw==="string"||typeof raw==="number") return {value:String(raw), hyperlink:raw.hyperlink||null}; return raw; }
 function pick(obj, keys){ for(const k of keys){ if(obj && obj[k]!==undefined && obj[k]!==null) return obj[k]; } return undefined; }
 function getText(raw){ const direct=pick(raw,["value","formattedValue","text","label","displayValue"]); if(direct!==undefined) return String(direct); if(raw && raw.userEnteredValue && raw.userEnteredValue.stringValue) return String(raw.userEnteredValue.stringValue); if(raw && raw.effectiveValue && raw.effectiveValue.stringValue) return String(raw.effectiveValue.stringValue); return ""; }
-
-// ---------- Render sheet ----------
 function renderSheet(json){
   wrapper.innerHTML="";
   let scrollWrapper = wrapper;
@@ -184,12 +151,7 @@ function renderSheet(json){
     wrapper.appendChild(scrollWrapper);
   }
   const table=document.createElement("table");
-  
-  // Add hover class only for non-OMS sheets
-  if(currentSheet!=="01"){ 
-    table.classList.add("oms-hover"); 
-  }
-
+  if(currentSheet!=="01"){ table.classList.add("oms-hover"); }
   let autoFit = (currentSheet==="01");
   if(!autoFit){
     const colWidths=json.colWidths||[];
@@ -203,7 +165,6 @@ function renderSheet(json){
     table.appendChild(colgroup);
     table.style.tableLayout="fixed";
   }else{ table.style.tableLayout="auto"; table.style.width="100%"; }
-
   const rows=json.data||[];
   rows.forEach((rowData,i)=>{
     const tr=document.createElement("tr");
@@ -251,7 +212,6 @@ function renderSheet(json){
     });
     table.appendChild(tr);
   });
-
   (json.merged||[]).forEach(m=>{
     if(!m.numRows||!m.numCols) return;
     try{
@@ -272,28 +232,48 @@ function renderSheet(json){
       }
     }catch(e){ console.warn("merge error",e); }
   });
-
   (json.rowHeights||[]).forEach((h,i)=>{ if(table.rows[i]) table.rows[i].style.height=(h||25)+"px"; });
   scrollWrapper.appendChild(table);
-  adjustWrapperPosition();
-}
 
-// ---------- Load sheet ----------
-async function loadSheet(sheetName, showSpinner=true){
+  // ---------- 🔗 Hardcoded Hyperlinks ----------
+  try {
+    // Sheet 1 → Q10 (row index 9, col index 16)
+    if (currentSheet === "01" && table.rows[9] && table.rows[9].cells[16]) {
+      const cell = table.rows[9].cells[16];
+      const link = document.createElement("a");
+      link.href = "https://docs.google.com/spreadsheets/u/2/d/1p5yByiujS4pWcWfcNv5s79oZQ6dipeIPJGXO73Sqrvs/edit";
+      link.textContent = cell.textContent || "Q10 Link";
+      link.target = "_blank";
+      cell.innerHTML = "";
+      cell.appendChild(link);
+    }
+
+    // Sheet 2 → M1 (row index 0, col index 12)
+    if (currentSheet === "02" && table.rows[0] && table.rows[0].cells[12]) {
+      const cell = table.rows[0].cells[12];
+      const link = document.createElement("a");
+      link.href = "https://docs.google.com/spreadsheets/d/1eTSiXUk-FaLpfq85-NIDbXoY1qMtkmaXG6bj_epD0tw/edit?pli=1#gid=0";
+      link.textContent = cell.textContent || "M1 Link";
+      link.target = "_blank";
+      cell.innerHTML = "";
+      cell.appendChild(link);
+    }
+  } catch(e){ console.warn("Custom link insert error:", e); }
+  // ---------- end of hardcoded links ----------
+}
+async function loadSheet(sheetName,showSpinner){
   if(showSpinner) spinner.style.display="block";
   try{
-    const res=await fetch(`${webAppUrl}?sheet=${encodeURIComponent(sheetName)}&ts=${Date.now()}`);
+    const res=await fetch(`${webAppUrl}?sheet=${sheetName}`);
     const json=await res.json();
-    if(!json.data) json.data=[]; if(!json.colWidths) json.colWidths=[]; if(!json.rowHeights) json.rowHeights=[]; if(!json.merged) json.merged=[];
     renderSheet(json);
-  }catch(err){ wrapper.innerHTML=`<div style="color:red;">Error: ${err.message}</div>`; }
-  finally{ if(showSpinner) spinner.style.display="none"; }
+  }catch(e){
+    wrapper.innerHTML="<p style='color:red;'>Error loading sheet</p>";
+  }finally{ spinner.style.display="none"; }
 }
-
-loadSheet(currentSheet,true);
-adjustRibbonPosition();
 adjustWrapperPosition();
-
+adjustRibbonPosition();
+loadSheet(currentSheet,true);
 </script>
 </body>
 </html>
