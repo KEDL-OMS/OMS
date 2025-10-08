@@ -12,7 +12,7 @@ html, body { margin:0; padding:0; height:100%; width:100%; font-family: Arial, s
 .sidebar a.active { background:#00264d; }
 header { position:absolute; top:0; left:0; width:100%; height:100px; background:#004080; display:flex; align-items:center; padding:0 20px; box-sizing:border-box; z-index:500; }
 header .logo-left, header .logo-right { height:80px; width:120px; object-fit:contain; }
-header .logo-left { position:absolute; left:20px; }
+header .logo-left { position:absolute; left:60px; } /* shifted a bit right so hamburger doesn’t overlap */
 header .logo-right { position:absolute; right:220px; }
 header .title { position:absolute; left:50%; transform:translateX(-50%); font-weight:bold; font-size:24px; color:white; white-space:nowrap; }
 .refresh-btn, .logout-btn { border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
@@ -20,7 +20,19 @@ header .title { position:absolute; left:50%; transform:translateX(-50%); font-we
 .refresh-btn:hover { background:#00cc44; }
 .logout-btn { position:absolute; right:80px; background:#cc0000; color:white; }
 .logout-btn:hover { background:#ff3333; }
-.menu-toggle { position:absolute; right:20px; font-size:32px; cursor:pointer; user-select:none; }
+
+/* ✅ Only change — hamburger moved to top-left */
+.menu-toggle {
+  position:absolute;
+  left:20px;
+  top:30px;
+  font-size:32px;
+  cursor:pointer;
+  user-select:none;
+  color:white;
+  z-index:600;
+}
+
 .ribbon { position:absolute; top:100px; left:0; right:0; min-height:50px; background-color:#0066cc; display:flex; flex-wrap:wrap; align-items:center; padding:5px 10px; white-space:normal; z-index:400; border:4px solid black; border-radius:0; box-sizing:border-box; transition:left 0.3s ease; }
 .ribbon a { color:white; text-decoration:none; padding:8px 14px; margin:4px 6px; border-radius:6px; font-weight:bold; flex-shrink:0; transition: background 0.2s; }
 .ribbon a:hover { background-color:#004080; }
@@ -52,12 +64,12 @@ th, td { border:none; padding:4px; overflow:hidden; text-overflow:ellipsis; whit
   <a href="#" data-sheet="012">MTD Report</a>
 </div>
 <header>
+  <span class="menu-toggle" id="menuToggle">&#9776;</span>
   <img src="Images/KEDL-Logo.png" class="logo-left">
   <div class="title">Outage Management System KEDL-CESC Rajasthan</div>
   <img src="Images/RPSG-Logo.png" class="logo-right">
   <button class="refresh-btn" id="refreshSheet">Refresh</button>
   <button class="logout-btn" id="logoutBtn">Logout</button>
-  <span class="menu-toggle" id="menuToggle">&#9776;</span>
 </header>
 <div class="ribbon">
   <a href="dashboard.html">OMS</a>
@@ -242,38 +254,32 @@ function renderSheet(json){
       const cell = table.rows[9].cells[16];
       const link = document.createElement("a");
       link.href = "https://docs.google.com/spreadsheets/u/2/d/1p5yByiujS4pWcWfcNv5s79oZQ6dipeIPJGXO73Sqrvs/edit";
-      link.textContent = cell.textContent || "Q10 Link";
+      link.textContent = cell.textContent || "Open Sheet 1";
       link.target = "_blank";
-      cell.innerHTML = "";
+      cell.textContent = "";
       cell.appendChild(link);
     }
-
     // Sheet 2 → M1 (row index 0, col index 12)
     if (currentSheet === "02" && table.rows[0] && table.rows[0].cells[12]) {
       const cell = table.rows[0].cells[12];
       const link = document.createElement("a");
-      link.href = "https://docs.google.com/spreadsheets/d/1eTSiXUk-FaLpfq85-NIDbXoY1qMtkmaXG6bj_epD0tw/edit?pli=1#gid=0";
-      link.textContent = cell.textContent || "M1 Link";
+      link.href = "https://docs.google.com/spreadsheets/d/1eTSiXUk-FaLpfq85-NID";
+      link.textContent = cell.textContent || "Open Sheet 2";
       link.target = "_blank";
-      cell.innerHTML = "";
+      cell.textContent = "";
       cell.appendChild(link);
     }
-  } catch(e){ console.warn("Custom link insert error:", e); }
-  // ---------- end of hardcoded links ----------
+  } catch(e) { console.warn("Hyperlink insertion error:", e); }
 }
-async function loadSheet(sheetName,showSpinner){
+function loadSheet(sheet, showSpinner){
   if(showSpinner) spinner.style.display="block";
-  try{
-    const res=await fetch(`${webAppUrl}?sheet=${sheetName}`);
-    const json=await res.json();
-    renderSheet(json);
-  }catch(e){
-    wrapper.innerHTML="<p style='color:red;'>Error loading sheet</p>";
-  }finally{ spinner.style.display="none"; }
+  fetch(`${webAppUrl}?sheet=${encodeURIComponent(sheet)}&_=${Date.now()}`)
+    .then(res=>res.json())
+    .then(json=>renderSheet(json))
+    .catch(err=>{ console.error(err); wrapper.innerHTML="<p style='color:red;text-align:center;'>Error loading data</p>"; })
+    .finally(()=>{ spinner.style.display="none"; adjustWrapperPosition(); adjustRibbonPosition(); });
 }
-adjustWrapperPosition();
-adjustRibbonPosition();
-loadSheet(currentSheet,true);
+window.addEventListener("load", ()=>{ adjustWrapperPosition(); adjustRibbonPosition(); loadSheet(currentSheet,true); });
 </script>
 </body>
 </html>
