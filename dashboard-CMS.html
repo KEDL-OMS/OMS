@@ -205,6 +205,63 @@ function renderSheet(json){
   const rows=json.data||[];
   rows.forEach((rowData,i)=>{
     const tr=document.createElement("tr");
+
+    // ---------- NEW: handle merged A1:J1 from the sheet ----------
+    // If the first row is actually a merged header (A1:J1), render a single <th> with colspan=10 and center it.
+    if(i === 0){
+      const raw0 = normalizeCell((rowData||[])[0]);
+      const cell = document.createElement("th");
+      // If the cell contains a hyperlink, render it as an <a>
+      if(raw0 && raw0.hyperlink){
+        const a = document.createElement("a");
+        a.href = raw0.hyperlink;
+        a.textContent = getText(raw0);
+        a.target = "_blank";
+        cell.appendChild(a);
+      } else {
+        cell.textContent = getText(raw0);
+      }
+
+      // Apply the same basic styling logic used for other cells (fallbacks preserved)
+      const tf = raw0.textFormat||{};
+      const bg = pick(raw0,["background","backgroundColor","bg","bgColor"]);
+      const color = pick(raw0,["color","textColor","fontColor"])||tf.foregroundColor;
+      const weight = pick(raw0,["weight","fontWeight","bold"]);
+      const valign = pick(raw0,["valign","verticalAlign"]);
+      const fsize = pick(raw0,["fontSize","size"])??tf.fontSize;
+      const ffam = pick(raw0,["fontFamily","font"])??tf.fontFamily;
+      const italic = pick(raw0,["italic"])??tf.italic;
+      const underline = pick(raw0,["underline"])||tf.underline;
+      const strike = pick(raw0,["strike","strikethrough"])||tf.strikethrough;
+      const wrap = pick(raw0,["wrap","wrapStrategy","wrapText"]);
+
+      cell.colSpan = 10; // simulate A1:J1 merged
+      cell.style.backgroundColor = bg || "#004080";
+      cell.style.color = color || "white";
+      if(weight!==undefined){ if(typeof weight==="boolean") cell.style.fontWeight=weight?"bold":"normal"; else if(typeof weight==="number") cell.style.fontWeight=(weight>=600?"bold":"normal"); else cell.style.fontWeight=String(weight); } 
+      else cell.style.fontWeight = "bold";
+      // center horizontally and vertically for merged header
+      cell.style.textAlign = "center";
+      cell.style.verticalAlign = valign || "middle";
+      cell.style.fontSize = fsize?parseInt(fsize,10)+"px":"14px";
+      cell.style.fontFamily = ffam||"Arial, sans-serif";
+      if(italic) cell.style.fontStyle="italic";
+      if(underline && strike) cell.style.textDecoration="underline line-through";
+      else if(underline) cell.style.textDecoration="underline";
+      else if(strike) cell.style.textDecoration="line-through";
+      if(wrap!==undefined){
+        const w=String(wrap).toUpperCase();
+        if(w==="WRAP"||wrap===true){ cell.style.whiteSpace="normal"; cell.style.wordBreak="break-word"; } 
+        else if(w==="CLIP"){ cell.style.whiteSpace="nowrap"; cell.style.overflow="hidden"; cell.style.textOverflow="clip"; } 
+        else if(w==="OVERFLOW"){ cell.style.whiteSpace="nowrap"; cell.style.overflow="visible"; }
+      }else{ cell.style.whiteSpace="normal"; cell.style.wordBreak="break-word"; }
+
+      tr.appendChild(cell);
+      table.appendChild(tr);
+      return; // skip normal per-cell rendering for this row
+    }
+
+    // ---------- Normal per-cell rendering (unchanged) ----------
     (rowData||[]).forEach((cellRaw,j)=>{
       const raw=normalizeCell(cellRaw);
       const cell=document.createElement(i===0?"th":"td");
